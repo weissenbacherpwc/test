@@ -83,131 +83,131 @@ with st.sidebar:
     
 st.sidebar.write(f"You chose Model: {model_name} and Strategy: {choose_strategy}")
     
-# # Allow the user to upload a file with supported extensions.
-if choose_data == "Own Document":
-    uploaded_file = st.file_uploader("Upload an article (max 20 pages)", type=("pdf"))
-    if uploaded_file:
-        # Save the uploaded file locally.
-        with open(uploaded_file.name, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        #st.write(uploaded_file)
-        #st.write(uploaded_file.type)
-        st.write("Creating Vectordatabase...")
-        loader = PyMuPDFLoader(uploaded_file.name)
-        data = loader.load()
-        embeddings = HuggingFaceEmbeddings(model_name=cfg.EMBEDDING_MODEL_NAME,
-                                        model_kwargs={'device': 'mps'})
+# # # Allow the user to upload a file with supported extensions.
+# if choose_data == "Own Document":
+#     uploaded_file = st.file_uploader("Upload an article (max 20 pages)", type=("pdf"))
+#     if uploaded_file:
+#         # Save the uploaded file locally.
+#         with open(uploaded_file.name, "wb") as f:
+#             f.write(uploaded_file.getbuffer())
+#         #st.write(uploaded_file)
+#         #st.write(uploaded_file.type)
+#         st.write("Creating Vectordatabase...")
+#         loader = PyMuPDFLoader(uploaded_file.name)
+#         data = loader.load()
+#         embeddings = HuggingFaceEmbeddings(model_name=cfg.EMBEDDING_MODEL_NAME,
+#                                         model_kwargs={'device': 'mps'})
 
-        vectorstore = FAISS.from_documents(data, embeddings) 
-        if vectorstore:
-            st.write("Vector Database created!")
-        else:
-            st.write("Vector Database building...")
-    else:
-        st.write("Please choose a file!")
+#         vectorstore = FAISS.from_documents(data, embeddings) 
+#         if vectorstore:
+#             st.write("Vector Database created!")
+#         else:
+#             st.write("Vector Database building...")
+#     else:
+#         st.write("Please choose a file!")
 
-# Store LLM generated responses
-if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "Hallo, ich kann dir Fragen zum IPv6 Confluence beantworten."}]
+# # Store LLM generated responses
+# if "messages" not in st.session_state.keys():
+#     st.session_state.messages = [{"role": "assistant", "content": "Hallo, ich kann dir Fragen zum IPv6 Confluence beantworten."}]
 
-# Display or clear chat messages   
-def clear_chat_history():
-    torch.mps.empty_cache()
-    st.session_state.messages = [{"role": "assistant", "content": "Hallo, ich kann dir Fragen zum IPv6 Confluence beantworten."}]
-st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
+# # Display or clear chat messages   
+# def clear_chat_history():
+#     torch.mps.empty_cache()
+#     st.session_state.messages = [{"role": "assistant", "content": "Hallo, ich kann dir Fragen zum IPv6 Confluence beantworten."}]
+# st.sidebar.button('Clear Chat History', on_click=clear_chat_history)
 
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        avatar = "static/Person_Fill_Black_RGB.svg"
-    if message["role"] == "assistant":
-        avatar = "static/Bot_Fill_DigitalRose_RGB.svg"
-    with st.chat_message(message["role"], avatar=avatar):
-        st.write(message["content"])
+# for message in st.session_state.messages:
+#     if message["role"] == "user":
+#         avatar = "static/Person_Fill_Black_RGB.svg"
+#     if message["role"] == "assistant":
+#         avatar = "static/Bot_Fill_DigitalRose_RGB.svg"
+#     with st.chat_message(message["role"], avatar=avatar):
+#         st.write(message["content"])
         
-if prompt := st.chat_input(disabled=not model_name): 
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="static/Person_Fill_Black_RGB.svg"):
-        st.write(prompt)
+# if prompt := st.chat_input(disabled=not model_name): 
+#     st.session_state.messages.append({"role": "user", "content": prompt})
+#     with st.chat_message("user", avatar="static/Person_Fill_Black_RGB.svg"):
+#         st.write(prompt)
 
-@st.cache_resource
-def setup_model_dbqa():
-    dbqa = setup_dbqa(strategy=strategy, model_path=model_path)
-    return dbqa
+# @st.cache_resource
+# def setup_model_dbqa():
+#     dbqa = setup_dbqa(strategy=strategy, model_path=model_path)
+#     return dbqa
     
-@st.cache_resource
-def setup_llm():
-    llm = build_llm(model_path=model_path)
-    return llm
+# @st.cache_resource
+# def setup_llm():
+#     llm = build_llm(model_path=model_path)
+#     return llm
                    
 
-# Generate a new response if last message is not from assistant
-if st.session_state.messages[-1]["role"] != "assistant":
-    # um zu verhindern, dass OOM Fehler kommt erst definieren
-    with st.chat_message("assistant", avatar="static/Bot_Fill_DigitalRose_RGB.svg"):
-        with st.spinner("Thinking..."):
-            if choose_data == "Confluence data":
-                st.write(model_path)
-                placeholder_stream = st.empty()
-                st_callback = StreamlitCallbackHandler(placeholder_stream)
-                #langchain.debug = True
-                start_time = time.time()
-                dbqa = setup_model_dbqa()
-                answer = dbqa(prompt, callbacks=[st_callback])
-                print(f"Chain History: {dbqa.combine_documents_chain.memory}")
-                end_time = time.time()
-                time_ = end_time - start_time
-                st.write(f"Response Time: {time_}")
-                answer_text = answer["result"]
-                placeholder_stream = placeholder_stream.empty()
-                placeholder = st.empty()
-                placeholder.markdown(answer_text)
-                source_docs = answer['source_documents']
-                for i, doc in enumerate(source_docs):
-                    st.write(f'\nSource Document {i+1}\n')
-                    st.write(f'Document Name: {doc.metadata["source"]}')
-                    st.write('='* 60)
-                torch.mps.empty_cache()
+# # Generate a new response if last message is not from assistant
+# if st.session_state.messages[-1]["role"] != "assistant":
+#     # um zu verhindern, dass OOM Fehler kommt erst definieren
+#     with st.chat_message("assistant", avatar="static/Bot_Fill_DigitalRose_RGB.svg"):
+#         with st.spinner("Thinking..."):
+#             if choose_data == "Confluence data":
+#                 st.write(model_path)
+#                 placeholder_stream = st.empty()
+#                 st_callback = StreamlitCallbackHandler(placeholder_stream)
+#                 #langchain.debug = True
+#                 start_time = time.time()
+#                 dbqa = setup_model_dbqa()
+#                 answer = dbqa(prompt, callbacks=[st_callback])
+#                 print(f"Chain History: {dbqa.combine_documents_chain.memory}")
+#                 end_time = time.time()
+#                 time_ = end_time - start_time
+#                 st.write(f"Response Time: {time_}")
+#                 answer_text = answer["result"]
+#                 placeholder_stream = placeholder_stream.empty()
+#                 placeholder = st.empty()
+#                 placeholder.markdown(answer_text)
+#                 source_docs = answer['source_documents']
+#                 for i, doc in enumerate(source_docs):
+#                     st.write(f'\nSource Document {i+1}\n')
+#                     st.write(f'Document Name: {doc.metadata["source"]}')
+#                     st.write('='* 60)
+#                 torch.mps.empty_cache()
                     
                     
-            if choose_data == "Own Document":
-                if model_name == "Mixtral 8x7B (MoE)":
-                    placeholder_stream = st.empty()
-                    st_callback = StreamlitCallbackHandler(placeholder_stream)
-                    qa_prompt = set_mistral_prompt()
-                    llm = setup_llm()
-                    mixtral_qa = build_retrieval_qa(llm=llm,prompt=qa_prompt,vectordb=vectorstore)
-                    answer = mixtral_qa(prompt, callbacks=[st_callback])
-                    answer_text = answer["result"]
-                    placeholder_stream = placeholder_stream.empty()
-                    placeholder = st.empty()
-                    placeholder.markdown(answer_text)
-                    source_docs = answer['source_documents']
-                    for i, doc in enumerate(source_docs):
-                        st.write(f'\nSource Document {i+1}\n')
-                        st.write(f'Document Name: {doc.metadata["source"]}')
-                        st.write('='* 60)
+#             if choose_data == "Own Document":
+#                 if model_name == "Mixtral 8x7B (MoE)":
+#                     placeholder_stream = st.empty()
+#                     st_callback = StreamlitCallbackHandler(placeholder_stream)
+#                     qa_prompt = set_mistral_prompt()
+#                     llm = setup_llm()
+#                     mixtral_qa = build_retrieval_qa(llm=llm,prompt=qa_prompt,vectordb=vectorstore)
+#                     answer = mixtral_qa(prompt, callbacks=[st_callback])
+#                     answer_text = answer["result"]
+#                     placeholder_stream = placeholder_stream.empty()
+#                     placeholder = st.empty()
+#                     placeholder.markdown(answer_text)
+#                     source_docs = answer['source_documents']
+#                     for i, doc in enumerate(source_docs):
+#                         st.write(f'\nSource Document {i+1}\n')
+#                         st.write(f'Document Name: {doc.metadata["source"]}')
+#                         st.write('='* 60)
                         
                         
-            if choose_data == "No Rag - LLM Chat":
-                # Um hier Memory zu etablieren, muss ich eine eigene Chain aufsetzten, mit einem eigenen Prompt.
-                start_time = time.time()
-                llm = setup_llm()
-                placeholder = st.empty()                
-                st.write(model_path)
-                st_callback = StreamlitCallbackHandler(placeholder)
-                answer_text = llm(prompt, callbacks=[st_callback])
-                end_time = time.time()
-                time_ = end_time - start_time
-                st.write(time_)
-                placeholder.markdown(answer_text)
+#             if choose_data == "No Rag - LLM Chat":
+#                 # Um hier Memory zu etablieren, muss ich eine eigene Chain aufsetzten, mit einem eigenen Prompt.
+#                 start_time = time.time()
+#                 llm = setup_llm()
+#                 placeholder = st.empty()                
+#                 st.write(model_path)
+#                 st_callback = StreamlitCallbackHandler(placeholder)
+#                 answer_text = llm(prompt, callbacks=[st_callback])
+#                 end_time = time.time()
+#                 time_ = end_time - start_time
+#                 st.write(time_)
+#                 placeholder.markdown(answer_text)
                 
                 
                 
-    message = {"role": "assistant", "content": answer_text}
+#     message = {"role": "assistant", "content": answer_text}
 
-    st.session_state.messages.append(message)
+#     st.session_state.messages.append(message)
     
     
-    # Ganzes Document hinzufügen, also Vectordb erstellen etc.
-    # Antworte sehr knapp: Was ist die Hauptstadt von Österreich?
-    # 
+#     # Ganzes Document hinzufügen, also Vectordb erstellen etc.
+#     # Antworte sehr knapp: Was ist die Hauptstadt von Österreich?
+#     # 
