@@ -19,7 +19,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 import langchain
 import box
 
-torch.mps.empty_cache()
+#torch.mps.empty_cache()
 
 # Import config vars
 with open('config/config.yml', 'r', encoding='utf8') as ymlfile:
