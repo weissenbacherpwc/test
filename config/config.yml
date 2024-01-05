@@ -1,0 +1,28 @@
+RETURN_SOURCE_DOCUMENTS: True
+VECTOR_COUNT: 3
+CHUNK_SIZE: 1200 # 6000 Context Size / 5 Vector Count
+CHUNK_OVERLAP: 400
+#DATA_PATH: '/Users/mweissenba001/Documents/Protokolldaten/'
+DATA_PATH: '/Users/mweissenba001/Documents/eine_datei/'
+DB_FAISS_PATH: 'vectorstore/db_faiss'
+BM25_PATH: 'vectorstore/db_bm25'
+PARENT_PATH: 'vectorstore/parent_retriever'
+MAX_TOKENS: 600
+#MODEL_BIN_PATH: '/Users/mweissenba001/Documents/llama2/llama.cpp/models/7B/ggml-model-q4_0.bin' 
+MODEL_BIN_PATH: '/Users/mweissenba001/Documents/rag_example/Modelle/em_german_mistral_v01.Q5_K_M.gguf'
+#MODEL_BIN_PATH: /Users/mweissenba001/Documents/rag_example/Modelle/leo-hessianai-13b-chat.Q5_K_M.gguf
+#MODEL_BIN_PATH: /Users/mweissenba001/Documents/rag_example/Modelle/leo-mistral-hessianai-7b-chat.Q5_K_M.gguf
+TEMPERATURE: 0.01 #0.05, 0.1 erst, für Evaluation bei 0
+
+
+EMBEDDING_MODEL_NAME: "intfloat/multilingual-e5-large"
+#EMBEDDING_MODEL_NAME: "sentence-transformers/all-MiniLM-L6-v2"
+#EMBEDDING_MODEL_NAME: "T-Systems-onsite/german-roberta-sentence-transformer-v2"
+#EMBEDDING_MODEL_NAME: "deutsche-telekom/gbert-large-paraphrase-cosine"
+#EMBEDDING_MODEL_NAME: "aari1995/German_Semantic_STS_V2"
+#EMBEDDING_MODEL_NAME: "sentence-transformers/distiluse-base-multilingual-cased-v1"
+# auch mal die Llama Embeddings Testen
+
+
+# Similarity Score Treshold:
+SCORE_TRESHOLD: 0.6 # vorher 0.6 war gut
